@@ -3,6 +3,7 @@ package com.blog.recovery.controller;
 
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.request.PostCreate;
+import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import com.blog.recovery.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +42,8 @@ public class PostController {
     }
 
     @GetMapping("/post")
-    public List<PostResponse> getList(@PageableDefault(size = 10) Pageable page){
-        return service.getList(page);
+    public List<PostResponse> getList(PostSearch search){
+        return service.getList(search);
     }
 
 

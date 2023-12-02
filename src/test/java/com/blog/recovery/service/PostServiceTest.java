@@ -3,6 +3,7 @@ package com.blog.recovery.service;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.repository.PostRepository;
 import com.blog.recovery.request.PostCreate;
+import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -97,10 +98,12 @@ class PostServiceTest {
 
         repository.saveAll(requestPost);
 
-        PageRequest page = PageRequest.of(0, 10, Sort.Direction.DESC,"id");
+        PostSearch search = PostSearch.builder()
+                .page(1)
+                .build();
 
         // when
-        List<PostResponse> posts = postService.getList(page);
+        List<PostResponse> posts = postService.getList(search);
 
         //then
         assertThat(posts.size()).isEqualTo(10);

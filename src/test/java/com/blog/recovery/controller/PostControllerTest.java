@@ -120,41 +120,6 @@ class PostControllerTest {
 
 
     @Test
-    @DisplayName("사용자의 전체글 조회 요청에 성공해야한다.")
-    void getList() throws Exception {
-        //given
-        String title1 = "foo1";
-        String title2 = "foo2";
-        String content1 = "bar";
-        String content2 = "bar";
-
-        Post request1 = Post.builder()
-                .title(title1)
-                .content(content1)
-                .build();
-
-        Post request2 = Post.builder()
-                .title(title2)
-                .content(content2)
-                .build();
-
-        List<Post> postList = postRepository.saveAll(List.of(request1, request2));
-
-        // when , then
-        mockMvc.perform(
-                        MockMvcRequestBuilders.get("/post")
-                                .contentType(APPLICATION_JSON)
-                )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.length()", Matchers.is(2)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(request1.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value(request1.getTitle()))
-                .andDo(MockMvcResultHandlers.print());
-
-    }
-
-
-    @Test
     @DisplayName("사용자 요청에 의해 1페이지 조회 응답에 성공해야한다.")
     void test() throws Exception {
         //given
@@ -169,7 +134,32 @@ class PostControllerTest {
 
         // when , then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/post?page=1&sort=id,desc")
+                        MockMvcRequestBuilders.get("/post?page=1&size=10")
+                                .contentType(APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(10))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value("제목 30"))
+                .andDo(MockMvcResultHandlers.print());
+
+    }
+
+    @Test
+    @DisplayName("사용자가 페이지 요청을 0으로해도 첫페이지를 가져온다.")
+    void paging() throws Exception {
+        //given
+        List<Post> requestPost = IntStream.range(1, 31)
+                .mapToObj(i -> Post.builder()
+                        .title("제목 " + i)
+                        .content("내용 " + i)
+                        .build())
+                .toList();
+
+        postRepository.saveAll(requestPost);
+
+        // when , then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/post?page=0&size=10")
                                 .contentType(APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().isOk())

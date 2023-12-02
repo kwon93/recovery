@@ -3,6 +3,7 @@ package com.blog.recovery.service;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.repository.PostRepository;
 import com.blog.recovery.request.PostCreate;
+import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,9 +42,9 @@ public class PostService {
         return post;
     }
 
-    public List<PostResponse> getList(Pageable pageable) {
+    public List<PostResponse> getList(PostSearch search) {
 
-        return postRepository.findAll(pageable).stream()
+        return postRepository.getList(search).stream()
                 .map(PostResponse::of)
                 .toList();
     }
