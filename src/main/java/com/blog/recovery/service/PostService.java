@@ -1,8 +1,11 @@
 package com.blog.recovery.service;
 
 import com.blog.recovery.domain.Post;
+import com.blog.recovery.domain.PostEditor;
+import com.blog.recovery.exception.PostNotFound;
 import com.blog.recovery.repository.PostRepository;
 import com.blog.recovery.request.PostCreate;
+import com.blog.recovery.request.PostEdit;
 import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,6 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    @Transactional
     public void postSave(PostCreate request){
         Post postEntity = Post.of(request);
         postRepository.save(postEntity);
@@ -35,17 +37,37 @@ public class PostService {
 
     }
 
-    private Post searchPostByPostId(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 글입니다.")
-        );
-        return post;
-    }
-
     public List<PostResponse> getList(PostSearch search) {
 
         return postRepository.getList(search).stream()
                 .map(PostResponse::of)
                 .toList();
     }
+
+    @Transactional
+    public PostResponse update(Long id, PostEdit postEdit){
+        Post post = searchPostByPostId(id);
+
+        PostEditor.PostEditorBuilder editorBuilder = post.toEditor();
+
+        PostEditor edit = editorBuilder
+                .title(postEdit.getTitle())
+                .content(postEdit.getContent())
+                .build();
+
+        post.edit(edit);
+
+        return PostResponse.of(post);
+    }
+    @Transactional
+    public void delete(Long id) {
+        Post post = searchPostByPostId(id);
+        postRepository.delete(post);
+    }
+
+    private Post searchPostByPostId(Long id) {
+        return postRepository.findById(id)
+                .orElseThrow(PostNotFound::new);
+    }
+
 }

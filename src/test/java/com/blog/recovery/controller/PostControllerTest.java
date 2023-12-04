@@ -3,6 +3,7 @@ package com.blog.recovery.controller;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.repository.PostRepository;
 import com.blog.recovery.request.PostCreate;
+import com.blog.recovery.request.PostEdit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -47,7 +48,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("/post 요청시 title값이 없을경우 검증 후 에러 메시지를 응답해야한다.")
+    @DisplayName("/post 요청시 content값이 없을경우 검증 후 에러 메시지를 응답해야한다.")
     void post1() throws Exception {
         //given
         PostCreate postDTO = PostCreate.builder()
@@ -167,5 +168,122 @@ class PostControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value("제목 30"))
                 .andDo(MockMvcResultHandlers.print());
 
+    }
+
+
+    @Test
+    @DisplayName("사용자의 글 수정 요청에 응답해야한다.")
+    void update() throws Exception {
+        //given
+        Post post = Post.builder()
+                .title("제목")
+                .content("내용")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit editedPost = PostEdit.builder()
+                .title("수정된 제목")
+                .content("수정된 내용")
+                .build();
+
+        // when , then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/post/{postId}",post.getId())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(editedPost))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print());
+
+    }
+
+    @Test
+    @DisplayName("사용자의 글 삭제 요청에 HTTP 200 code로 응답해야한다.")
+    void delete() throws Exception {
+        //given
+        Post post = Post.builder()
+                .title("제목")
+                .content("내용")
+                .build();
+
+        postRepository.save(post);
+
+
+        // when , then
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/post/{postId}",post.getId())
+                                .contentType(APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print());
+
+    }
+
+
+    @Test
+    @DisplayName("존재하지않는 게시글 조회")
+    void exceptionTest() throws Exception {
+        //given
+
+        // when then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/post/{postId}",1L)
+                                .contentType(APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("존재하지않는 게시글 수정")
+    void exceptionTest2() throws Exception {
+        //given
+        PostEdit editedPost = PostEdit.builder()
+                .title("수정된 제목")
+                .content("수정된 내용")
+                .build();
+
+        // when then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/post/{postId}",999L)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(editedPost))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("존재하지않는 게시글 삭제")
+    void exceptionTest3() throws Exception {
+        //given
+
+        // when then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/post/{postId}",999L)
+                )
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("게시물 작성시 내용에 '바보'는 포함 될 수 없다.")
+    void post3() throws Exception {
+        //given
+        PostCreate postDTO = PostCreate.builder()
+                .title("하고싶은 말이 있습니다.")
+                .content("너는 바보입니다.")
+                .build();
+
+        //expected
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/post")
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(postDTO))
+                )
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(MockMvcResultHandlers.print());
     }
 }

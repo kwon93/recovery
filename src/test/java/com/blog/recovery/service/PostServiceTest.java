@@ -1,8 +1,10 @@
 package com.blog.recovery.service;
 
 import com.blog.recovery.domain.Post;
+import com.blog.recovery.exception.PostNotFound;
 import com.blog.recovery.repository.PostRepository;
 import com.blog.recovery.request.PostCreate;
+import com.blog.recovery.request.PostEdit;
 import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import org.assertj.core.api.Assertions;
@@ -111,6 +113,131 @@ class PostServiceTest {
         assertThat(posts.get(4).getTitle()).isEqualTo("제목 26");
 
     }
+
+    @Test
+    @DisplayName("저장된 글의 제목이 수정되어야한다.")
+    void update() throws Exception {
+        //given
+        Post post = Post.builder()
+                .title("제목")
+                .content("내용")
+                .build();
+
+        repository.save(post);
+
+        PostEdit editedPost = PostEdit.builder()
+                .title("수정된 제목")
+                .content("수정된 내용")
+                .build();
+
+        // when
+        postService.update(post.getId(), editedPost);
+
+
+        //then
+        Post validPost = repository.findById(post.getId())
+                .orElseThrow(() -> new RuntimeException("존재하지않는 글입니다. id = " + post.getId()));
+        assertThat(validPost.getTitle()).isEqualTo("수정된 제목");
+        assertThat(validPost.getContent()).isEqualTo("수정된 내용");
+
+    }
+
+    @Test
+    @DisplayName("저장된 글이 삭제되어야한다.")
+    void delete() throws Exception {
+        //given
+        Post post = Post.builder()
+                .title("제목")
+                .content("내용")
+                .build();
+
+        repository.save(post);
+
+
+        // when
+        postService.delete(post.getId());
+
+
+        //then
+        assertThat(repository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("존재하지않는 글 조회시에 PostNotFound Exception이 발생해야한다.\"")
+    void read2() throws Exception {
+        //given
+        String title1 = "foo";
+        String content1 = "bar";
+
+        Post request = Post.builder()
+                .title(title1)
+                .content(content1)
+                .build();
+
+        Post savedPost = repository.save(request);
+
+        // when then
+        PostNotFound e = assertThrows(PostNotFound.class, () -> {
+            PostResponse post = postService.read(savedPost.getId() + 1L);
+        });
+
+        assertThat(e.getMessage()).isEqualTo("존재하지 않는 글입니다.");
+
+    }
+
+    @Test
+    @DisplayName("존재하지않는 글 삭제시에 PostNotFound Exception이 발생해야한다.")
+    void delete2() throws Exception {
+        //given
+        String title1 = "foo";
+        String content1 = "bar";
+
+        Post request = Post.builder()
+                .title(title1)
+                .content(content1)
+                .build();
+
+        Post savedPost = repository.save(request);
+
+        // when then
+        PostNotFound e = assertThrows(PostNotFound.class, () -> {
+            postService.delete(savedPost.getId() + 1L);
+        });
+
+        assertThat(e.getMessage()).isEqualTo("존재하지 않는 글입니다.");
+
+    }
+
+    @Test
+    @DisplayName("존재하지않는 글 수정시에 PostNotFound Exception이 발생해야한다.")
+    void update2() throws Exception {
+        //given
+        String title1 = "foo";
+        String content1 = "bar";
+
+        Post request = Post.builder()
+                .title(title1)
+                .content(content1)
+                .build();
+
+        Post savedPost = repository.save(request);
+
+        PostEdit editedPost = PostEdit.builder()
+                .title("수정된 제목")
+                .content("수정된 내용")
+                .build();
+
+        // when then
+        PostNotFound e = assertThrows(PostNotFound.class, () -> {
+            postService.update(savedPost.getId() + 1L, editedPost);
+        });
+
+        assertThat(e.getMessage()).isEqualTo("존재하지 않는 글입니다.");
+
+    }
+
+
+
 
 
 }
