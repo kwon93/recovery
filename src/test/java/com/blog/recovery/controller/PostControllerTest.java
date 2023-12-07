@@ -269,7 +269,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("게시물 작성시 내용에 '바보'는 포함 될 수 없다.")
+    @DisplayName("게시물 작성 요청시 내용에 '바보'는 포함 될 수 없다.")
     void post3() throws Exception {
         //given
         PostCreate postDTO = PostCreate.builder()
@@ -286,4 +286,29 @@ class PostControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andDo(MockMvcResultHandlers.print());
     }
+
+    @Test
+    @DisplayName("글작성 요청시 DB에 요청한 정보가 저장되어야한다.")
+    void post4() throws Exception {
+        //given
+        PostCreate postDTO = PostCreate.builder()
+                .title("제목입니다~")
+                .content("내용입니다잉~~")
+                .build();
+
+        //when
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/post")
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(postDTO))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print());
+
+        //then
+        assertThat(postRepository.count()).isEqualTo(1);
+    }
+
+
+
 }

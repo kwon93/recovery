@@ -9,6 +9,7 @@ import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ class PostServiceTest {
     @Autowired
     private PostRepository repository;
 
-    @AfterEach
+    @BeforeEach
     void tearDown() {
         repository.deleteAllInBatch();
     }

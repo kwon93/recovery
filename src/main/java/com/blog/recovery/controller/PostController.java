@@ -1,6 +1,7 @@
 package com.blog.recovery.controller;
 
 
+import com.blog.recovery.config.data.UserSession;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.exception.InvalidRequest;
 import com.blog.recovery.request.PostCreate;
@@ -8,6 +9,7 @@ import com.blog.recovery.request.PostEdit;
 import com.blog.recovery.request.PostSearch;
 import com.blog.recovery.response.PostResponse;
 import com.blog.recovery.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,11 @@ public class PostController {
 
     private final PostService service;
 
+    @GetMapping("/foo")
+    public Long foo(UserSession userSession){
+        log.info("userSession Name = {}", userSession.getId());
+        return userSession.getId();
+    }
 
     @PostMapping("/post")
     public void post(@RequestBody @Validated PostCreate requset){

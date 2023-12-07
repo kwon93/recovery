@@ -13,4 +13,10 @@ spring:
     url: jdbc:h2:mem:h2db
     username: sa
     password:
-    driver Class: org.h2.Driver
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
