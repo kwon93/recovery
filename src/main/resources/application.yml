@@ -21,5 +21,6 @@ spring:
     init:
       mode: always
 
+
 kwon:
   KEY: "BTAQo1/fhbzvpOMCTBYjYtNuHgYGz3ubs+kya0+cmjE=";
