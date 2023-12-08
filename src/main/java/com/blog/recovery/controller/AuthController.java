@@ -1,5 +1,6 @@
 package com.blog.recovery.controller;
 
+import com.blog.recovery.config.AppConfig;
 import com.blog.recovery.request.LoginDTO;
 import com.blog.recovery.response.LoginResponse;
 import com.blog.recovery.response.SessionResponse;
@@ -27,7 +28,7 @@ import java.util.Base64;
 public class AuthController {
 
     private final UserService userService;
-    private static final String KEY = "BTAQo1/fhbzvpOMCTBYjYtNuHgYGz3ubs+kya0+cmjE=";
+    private final AppConfig appConfig;
 
     @PostMapping("/jwt/login")
     public SessionResponse jwtLogin(@RequestBody LoginDTO request){
@@ -39,7 +40,8 @@ public class AuthController {
 //        byte[] encodedKey = secretKey.getEncoded();
 //        String strkey = Base64.getEncoder().encodeToString(encodedKey);
 
-        SecretKey key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(KEY));
+
+        SecretKey key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(appConfig.getKEY()));
 
         String jws = Jwts.builder().setSubject(String.valueOf(userId)).signWith(key).compact();
 

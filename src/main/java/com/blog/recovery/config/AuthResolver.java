@@ -26,8 +26,8 @@ import java.util.Base64;
 public class AuthResolver implements HandlerMethodArgumentResolver {
 
     private final SessionRepository sessionRepository;
+    private final AppConfig appConfig;
 
-    private static final String KEY = "BTAQo1/fhbzvpOMCTBYjYtNuHgYGz3ubs+kya0+cmjE=";
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -42,7 +42,7 @@ public class AuthResolver implements HandlerMethodArgumentResolver {
             throw new UnAutorizedException();
         }
 
-        byte[] decodedKey = Base64.getDecoder().decode(KEY);
+        byte[] decodedKey = Base64.getDecoder().decode(appConfig.getKEY());
 
         //jws 복호화 (검증하기위해)
         try {
