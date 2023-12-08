@@ -4,6 +4,9 @@ import com.blog.recovery.request.LoginDTO;
 import com.blog.recovery.response.LoginResponse;
 import com.blog.recovery.response.SessionResponse;
 import com.blog.recovery.service.UserService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +16,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.crypto.SecretKey;
+import java.security.Key;
 import java.time.Duration;
+import java.util.Base64;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,19 +27,25 @@ import java.time.Duration;
 public class AuthController {
 
     private final UserService userService;
-    @PostMapping("/auth/login")
-    public ResponseEntity<Object> login(@RequestBody LoginDTO request) {
-        String accessToken = userService.signIn(request);
+    private static final String KEY = "BTAQo1/fhbzvpOMCTBYjYtNuHgYGz3ubs+kya0+cmjE=";
 
-        ResponseCookie cookie = getResponseCookie(accessToken);
+    @PostMapping("/jwt/login")
+    public SessionResponse jwtLogin(@RequestBody LoginDTO request){
+        Long userId = userService.signIn(request);
 
-        log.info(">>>>> Cookie =  {}", cookie.toString());
+        Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.SET_COOKIE,cookie.toString())
-                .build();
+        //JWT Key String으로 뽑아내기
+//        byte[] encodedKey = secretKey.getEncoded();
+//        String strkey = Base64.getEncoder().encodeToString(encodedKey);
+
+        SecretKey key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(KEY));
+
+        String jws = Jwts.builder().setSubject(String.valueOf(userId)).signWith(key).compact();
+
+        return new SessionResponse(jws);
     }
+
 
     private ResponseCookie getResponseCookie(String accessToken) {
 

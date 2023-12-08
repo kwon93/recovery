@@ -1,9 +1,14 @@
 package com.blog.recovery.config;
 
 import com.blog.recovery.config.data.UserSession;
+import com.blog.recovery.controller.AuthController;
 import com.blog.recovery.domain.Session;
 import com.blog.recovery.exception.UnAutorizedException;
 import com.blog.recovery.repository.SessionRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +19,15 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.util.Base64;
+
 @RequiredArgsConstructor
 @Slf4j
 public class AuthResolver implements HandlerMethodArgumentResolver {
 
     private final SessionRepository sessionRepository;
+
+    private static final String KEY = "BTAQo1/fhbzvpOMCTBYjYtNuHgYGz3ubs+kya0+cmjE=";
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -27,29 +36,34 @@ public class AuthResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+        String jws = webRequest.getHeader("Authorization");
 
-        if (servletRequest == null){
-            log.info("요청이 엄서용");
+        if (jws == null || jws.equals("")){
             throw new UnAutorizedException();
         }
 
-        Cookie[] cookies = servletRequest.getCookies();
+        byte[] decodedKey = Base64.getDecoder().decode(KEY);
 
-        if (cookies.length == 0){
-            log.info("쿠키가 엄서용");
+        //jws 복호화 (검증하기위해)
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(decodedKey)
+                    .build()
+                    .parseClaimsJws(jws);
+
+            String userId = claims.getBody().getSubject();
+
+            return UserSession.builder()
+                    .id(Long.parseLong(userId))
+                    .build();
+
+        } catch (JwtException e) {
             throw new UnAutorizedException();
         }
 
-        String token = cookies[0].getValue();
-
-        Session session = sessionRepository.findByAccessToken(token)
-                .orElseThrow(UnAutorizedException::new);
-
-        return UserSession.builder()
-                .id(session.getUser().getId())
-                .build();
     }
+
+
 
 
 }

@@ -29,7 +29,8 @@ public class PostController {
 
     @GetMapping("/foo")
     public Long foo(UserSession userSession){
-        log.info("userSession Name = {}", userSession.getId());
+        log.info("userSession id = {}", userSession.getId());
+
         return userSession.getId();
     }
 

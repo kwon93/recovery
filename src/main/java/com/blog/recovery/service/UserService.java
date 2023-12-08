@@ -18,14 +18,14 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public String  signIn(LoginDTO requestDTO){
+    public Long signIn(LoginDTO requestDTO){
         Users loginUser = userRepository
                 .findByEmailAndPassword(requestDTO.getEmail(), requestDTO.getPassword())
                 .orElseThrow(InvalidSignInfomation::new);
 
         Session session = loginUser.addSession();
 
-        return session.getAccessToken();
+        return loginUser.getId();
     }
 
 
