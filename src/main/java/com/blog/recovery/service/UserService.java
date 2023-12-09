@@ -1,11 +1,11 @@
 package com.blog.recovery.service;
 
-import com.blog.recovery.crypto.PasswordEncoders;
 import com.blog.recovery.domain.Users;
 import com.blog.recovery.exception.AlreadyExistEmailException;
 import com.blog.recovery.repository.UserRepository;
 import com.blog.recovery.request.SignUp;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +17,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoders encoder;
-
+    private final PasswordEncoder passwordEncoder;
 
 
     public void signUp(SignUp requestDTO) {
@@ -29,9 +28,11 @@ public class UserService {
             throw new AlreadyExistEmailException();
         }
 
-        String encryptedPassword = encoder.encrypt(requestDTO.getPassword());
+        String encryptedPassoword
+                = passwordEncoder.encode(requestDTO.getPassword());
 
-        Users users = Users.of(requestDTO, encryptedPassword);
+
+        Users users = Users.of(requestDTO, encryptedPassoword);
 
         userRepository.save(users);
     }

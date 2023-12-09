@@ -21,5 +21,14 @@ spring:
     init:
       mode: never
 
+  session:
+    timeout: 86400
+
+  server:
+    servlet:
+      session:
+        cookie:
+          max-age: 172800
+
 kwon:
   jwtKey: "ew+/UZ10UvCkoiwbkn+L24U1FdofU9RMRdP+99ib9ms="

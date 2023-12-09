@@ -43,14 +43,6 @@ class AuthControllerTest {
         userRepository.deleteAllInBatch();
     }
 
-
-
-
-
-
-
-
-
     @Test
     @DisplayName("회원가입에 성공해 200 코드를 응답한다.")
     void test6() throws Exception {
@@ -63,7 +55,7 @@ class AuthControllerTest {
 
 
         // expected
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/signup")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/signUp")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk())

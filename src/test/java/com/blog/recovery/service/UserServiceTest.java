@@ -1,6 +1,5 @@
 package com.blog.recovery.service;
 
-import com.blog.recovery.crypto.PasswordEncoders;
 import com.blog.recovery.domain.Users;
 import com.blog.recovery.exception.AlreadyExistEmailException;
 import com.blog.recovery.repository.UserRepository;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ class UserServiceTest {
 
 
     @Autowired
-    PasswordEncoders encoder;
+    PasswordEncoder encoder;
 
     @BeforeEach
     void setUp() {

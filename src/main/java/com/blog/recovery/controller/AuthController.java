@@ -17,15 +17,16 @@ public class AuthController {
 
     private final UserService userService;
 
-    @GetMapping("auth/login")
+    @GetMapping("/auth/login")
     public String login(){
         return "로그인 페이지입니다.";
     }
 
 
-    @PostMapping("/auth/signup")
-    public void signUp(@RequestBody SignUp signUp){
+    @PostMapping("/auth/signUp")
+    public String  signUp(@RequestBody SignUp signUp){
         userService.signUp(signUp);
+        return "회원가입완료";
     }
 
 
