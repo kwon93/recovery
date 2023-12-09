@@ -51,6 +51,18 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+	//SCrypt
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
+	implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: '6.2.0'
+	// https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
+	implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
+
+
+	//Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-test'
+
+
 }
 
 ext {

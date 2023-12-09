@@ -1,5 +1,6 @@
 package com.blog.recovery.domain;
 
+import com.blog.recovery.request.SignUp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,8 +23,6 @@ public class Users {
     private String email;
     private String password;
     private LocalDateTime regDate;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private List<Session> sessions = new ArrayList<>();
 
     @Builder
     public Users(Long id,String name, String email, String password) {
@@ -33,14 +32,12 @@ public class Users {
         this.password = password;
     }
 
-    public Session addSession() {
 
-        Session session = Session.builder()
-                .user(this)
+    public static Users of(SignUp signUp, String encodedPassWord){
+        return Users.builder()
+                .name(signUp.getName())
+                .email(signUp.getEmail())
+                .password(encodedPassWord)
                 .build();
-
-        sessions.add(session);
-
-        return session;
     }
 }

@@ -1,15 +1,17 @@
 package com.blog.recovery.service;
 
+import com.blog.recovery.crypto.PasswordEncoders;
 import com.blog.recovery.domain.Users;
-import com.blog.recovery.exception.InvalidSignInfomation;
-import com.blog.recovery.repository.SessionRepository;
+import com.blog.recovery.exception.AlreadyExistEmailException;
 import com.blog.recovery.repository.UserRepository;
-import com.blog.recovery.request.LoginDTO;
+import com.blog.recovery.request.SignUp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,73 +25,73 @@ class UserServiceTest {
     @Autowired
     UserRepository userRepository;
 
+
     @Autowired
-    SessionRepository sessionRepository;
+    PasswordEncoders encoder;
 
     @BeforeEach
     void setUp() {
-        sessionRepository.deleteAll();
         userRepository.deleteAllInBatch();
 
     }
 
+
+
+
     @Test
-    @DisplayName("DTO로 넘어온 정보에 맞는 사용자 정보를 DB에서 찾아와야한다.")
-    void test() throws Exception {
+    @DisplayName("회원가입 성공.")
+    void test4() throws Exception {
         //given
-        final String email = "kwon@naver.com";
-        final String password = "k1234";
 
-        Users usersInfo = Users.builder()
-                .email(email)
-                .password(password)
-                .build();
-
-        userRepository.save(usersInfo);
-
-        LoginDTO loginRequest = LoginDTO.builder()
-                .email(email)
-                .password(password)
+        SignUp request = SignUp.builder()
+                .name("홍길동")
+                .email("abc@naver.com")
+                .password("abc123")
                 .build();
 
         // when
-        userService.signIn(loginRequest);
-        //then
-        Users user = userRepository.findById(usersInfo.getId()).get();
+        userService.signUp(request);
 
-        assertThat(user.getEmail()).isEqualTo(email);
-        assertThat(user.getPassword()).isEqualTo(password);
+        //then
+        List<Users> users = userRepository.findAll();
+
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users.get(0).getName()).isEqualTo("홍길동");
+        assertThat(users.get(0).getEmail()).isEqualTo("abc@naver.com");
+        assertTrue(encoder.matches("abc123",users.get(0).getPassword()));
 
     }
 
-
     @Test
-    @DisplayName("사용자 요청이 DB의 정보와 불일치경우 InvalidException 을 발생시켜야함.")
-    void test2() throws Exception {
+    @DisplayName("중복된 이메일 요청은 AlreadyExistException()이 발생해야한다.")
+    void test5() throws Exception {
         //given
-        final String email = "kwon@naver.com";
-        final String password = "k1234";
-        final String invalidPW = "kdh93";
+        final String email = "abc@naver.com";
 
-        Users usersInfo = Users.builder()
+        Users.builder()
+                .name("권동혁")
                 .email(email)
-                .password(password)
+                .password("abc123")
                 .build();
 
-        userRepository.save(usersInfo);
-
-        LoginDTO invalidRequest = LoginDTO.builder()
+        userRepository.save(Users.builder()
+                .name("권동혁")
                 .email(email)
-                .password(invalidPW)
+                .password("abc123")
+                .build());
+
+
+        SignUp request = SignUp.builder()
+                .name("홍길동")
+                .email("abc@naver.com")
+                .password("abc123")
                 .build();
+
         // when then
+        AlreadyExistEmailException e = assertThrows(AlreadyExistEmailException.class,
+                () -> {userService.signUp(request);});
 
-        InvalidSignInfomation e = assertThrows(InvalidSignInfomation.class, () -> {
-            userService.signIn(invalidRequest);
-        });
-
-        assertThat(e.getMessage()).isEqualTo("이메일과 비밀번호를 다시 확인해주세요.");
-
+        assertThat(e.getMessage()).isEqualTo("이미 가입된 이메일 입니다.");
     }
 
 

@@ -1,22 +1,24 @@
 package com.blog.recovery.request;
 
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 @NoArgsConstructor
-public class LoginDTO {
+@Getter
+public class SignUp {
 
-    @NotBlank(message = "E mail을 입력해주세요.")
+    private String name;
+    @NotBlank
     private String email;
-
-    @NotBlank(message = "비밀번호를 입력해주세요.")
+    @NotBlank
     private String password;
 
     @Builder
-    public LoginDTO(String email, String password) {
+    public SignUp(String name, String email, String password) {
+        this.name = name;
         this.email = email;
         this.password = password;
     }
