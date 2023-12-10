@@ -24,6 +24,9 @@ public class Users {
     private String password;
     private LocalDateTime regDate;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Post> posts;
+
     @Builder
     public Users(Long id,String name, String email, String password) {
         this.id = id;

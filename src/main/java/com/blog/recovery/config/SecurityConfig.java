@@ -35,7 +35,6 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 
 @Configuration
 @EnableWebSecurity(debug = true)
-@EnableMethodSecurity()
 @RequiredArgsConstructor
 public class SecurityConfig {
 

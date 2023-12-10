@@ -1,5 +1,6 @@
 package com.blog.recovery.controller;
 
+import com.blog.recovery.config.RecoveryMockUser;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.repository.PostRepository;
 import com.blog.recovery.request.PostCreate;
@@ -18,6 +19,7 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.restdocs.request.RequestDocumentation;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -38,11 +40,11 @@ public class SpringControllerDocTest {
     private MockMvc mockMvc;
     @Autowired
     PostRepository postRepository;
-
     @Autowired
     ObjectMapper objectMapper;
 
     @Test
+    @WithMockUser(roles = {"USER"})
     @DisplayName("REST Docs Test: 글 단건 조회 테스트")
     void test() throws Exception {
         String title1 = "foo1";
@@ -74,6 +76,7 @@ public class SpringControllerDocTest {
     }
 
     @Test
+    @RecoveryMockUser()
     @DisplayName("REST Docs Test: 글 등록 테스트")
     void test2() throws Exception {
         String title1 = "foo1";

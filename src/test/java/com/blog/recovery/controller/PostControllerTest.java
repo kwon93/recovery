@@ -1,7 +1,10 @@
 package com.blog.recovery.controller;
 
+import com.blog.recovery.config.RecoveryMockUser;
 import com.blog.recovery.domain.Post;
+import com.blog.recovery.domain.Users;
 import com.blog.recovery.repository.PostRepository;
+import com.blog.recovery.repository.UserRepository;
 import com.blog.recovery.request.PostCreate;
 import com.blog.recovery.request.PostEdit;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,10 +45,13 @@ class PostControllerTest {
     ObjectMapper objectMapper;
     @Autowired
     PostRepository postRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @AfterEach
     void tearDown() {
         postRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
     }
 
     @Test
@@ -71,7 +77,7 @@ class PostControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
+    @RecoveryMockUser()
     @DisplayName("/post 요청시 DB에 요청한 정보가 저장되어야한다.")
     void post2() throws Exception {
         //given
@@ -151,7 +157,7 @@ class PostControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
+    @WithMockUser(roles = {"USER"})
     @DisplayName("사용자가 페이지 요청을 0으로해도 첫페이지를 가져온다.")
     void paging() throws Exception {
         //given
@@ -206,11 +212,21 @@ class PostControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
+    @RecoveryMockUser
     @DisplayName("사용자의 글 삭제 요청에 HTTP 200 code로 응답해야한다.")
     void delete() throws Exception {
         //given
+        Users user = Users.builder()
+                .id(1L)
+                .email("kwon93@naver.com")
+                .name("kwon")
+                .password("k1234")
+                .build();
+
+        Users savedUser = userRepository.save(user);
+
         Post post = Post.builder()
+                .user(savedUser)
                 .title("제목")
                 .content("내용")
                 .build();
@@ -231,7 +247,7 @@ class PostControllerTest {
 
 
     @Test
-    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
+    @WithMockUser(roles = {"USER"})
     @DisplayName("존재하지않는 게시글 조회")
     void exceptionTest() throws Exception {
         //given
@@ -266,7 +282,7 @@ class PostControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
+    @RecoveryMockUser
     @DisplayName("존재하지않는 게시글 삭제")
     void exceptionTest3() throws Exception {
         //given
@@ -297,29 +313,6 @@ class PostControllerTest {
                 )
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
-    @DisplayName("글작성 요청시 DB에 요청한 정보가 저장되어야한다.")
-    void post4() throws Exception {
-        //given
-        PostCreate postDTO = PostCreate.builder()
-                .title("제목입니다~")
-                .content("내용입니다잉~~")
-                .build();
-
-        //when
-        mockMvc.perform(
-                        MockMvcRequestBuilders.post("/post")
-                                .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postDTO))
-                )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcResultHandlers.print());
-
-        //then
-        assertThat(postRepository.count()).isEqualTo(1);
     }
 
 

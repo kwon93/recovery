@@ -1,9 +1,13 @@
 package com.blog.recovery.service;
 
+import com.blog.recovery.config.UserPrincipal;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.domain.PostEditor;
+import com.blog.recovery.domain.Users;
 import com.blog.recovery.exception.PostNotFound;
+import com.blog.recovery.exception.UserNotFound;
 import com.blog.recovery.repository.PostRepository;
+import com.blog.recovery.repository.UserRepository;
 import com.blog.recovery.request.PostCreate;
 import com.blog.recovery.request.PostEdit;
 import com.blog.recovery.request.PostSearch;
@@ -25,9 +29,13 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    public void postSave(PostCreate request){
-        Post postEntity = Post.of(request);
+    public void postSave(PostCreate request, Long userId){
+        Users users = userRepository.findById(userId)
+                .orElseThrow(UserNotFound::new);
+
+        Post postEntity = Post.of(request, users);
         postRepository.save(postEntity);
     }
 

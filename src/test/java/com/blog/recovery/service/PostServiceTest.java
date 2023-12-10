@@ -1,8 +1,10 @@
 package com.blog.recovery.service;
 
 import com.blog.recovery.domain.Post;
+import com.blog.recovery.domain.Users;
 import com.blog.recovery.exception.PostNotFound;
 import com.blog.recovery.repository.PostRepository;
+import com.blog.recovery.repository.UserRepository;
 import com.blog.recovery.request.PostCreate;
 import com.blog.recovery.request.PostEdit;
 import com.blog.recovery.request.PostSearch;
@@ -36,6 +38,9 @@ class PostServiceTest {
     @Autowired
     private PostRepository repository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @BeforeEach
     void tearDown() {
         repository.deleteAllInBatch();
@@ -50,9 +55,17 @@ class PostServiceTest {
                 .content("내용")
                 .build();
 
+        Users user = Users.builder()
+                .email("kwon93@naver.com")
+                .password("k1234")
+                .name("kwon")
+                .build();
+
+        Users users = userRepository.save(user);
+
 
         // when
-        postService.postSave(request);
+        postService.postSave(request, users.getId());
 
 
         //then

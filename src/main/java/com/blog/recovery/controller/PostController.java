@@ -1,6 +1,7 @@
 package com.blog.recovery.controller;
 
 
+import com.blog.recovery.config.UserPrincipal;
 import com.blog.recovery.config.data.UserSession;
 import com.blog.recovery.domain.Post;
 import com.blog.recovery.exception.InvalidRequest;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +39,9 @@ public class PostController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/post")
-    public void post(@RequestBody @Validated PostCreate requset){
+    public void post(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody @Validated PostCreate requset){
         requset.validate();
-        service.postSave(requset);
+        service.postSave(requset, userPrincipal.getUserId());
     }
 
     @GetMapping("/post/{postId}")
@@ -57,7 +59,7 @@ public class PostController {
     public PostResponse update(@PathVariable Long postId, @RequestBody @Validated PostEdit postEdit){
         return service.update(postId, postEdit);
     }
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && hasPermission(#postId,'POST', 'DELETE')")
     @DeleteMapping("/post/{postId}")
     public void delete(@PathVariable Long postId){
         service.delete(postId);

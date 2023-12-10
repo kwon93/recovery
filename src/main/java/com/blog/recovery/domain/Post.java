@@ -22,9 +22,13 @@ public class Post {
     @Lob
     private String content;
 
+    @ManyToOne
+    private Users user;
+
 
     @Builder
-    public Post(String title, String content) {
+    public Post(String title, String content, Users user) {
+        this.user = user;
         this.title = title;
         this.content = content;
     }
@@ -35,8 +39,9 @@ public class Post {
                 .content(content);
     }
 
-    public static Post of(PostCreate request){
+    public static Post of(PostCreate request, Users user){
         return Post.builder()
+                .user(user)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .build();
@@ -45,5 +50,9 @@ public class Post {
     public void edit(PostEditor edit) {
         title = edit.getTitle();
         content = edit.getContent();
+    }
+
+    public Long getUserId(){
+        return this.user.getId();
     }
 }
