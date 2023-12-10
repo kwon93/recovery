@@ -1,5 +1,7 @@
 package com.blog.recovery.controller;
 
+import com.blog.recovery.config.UserPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +15,9 @@ public class MainController {
     }
 
     @GetMapping("/user")
-    public String user(){
-        return "사용자 페이지입니다.";
+    public String user(@AuthenticationPrincipal UserPrincipal userPrincipal){
+
+        return userPrincipal.getUsername()+"님의 페이지입니다.";
     }
 
     @GetMapping("/admin")

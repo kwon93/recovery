@@ -1,36 +1,43 @@
 package com.blog.recovery.config;
 
+import com.blog.recovery.config.filter.EmailPasswordAuthFilter;
+import com.blog.recovery.config.handler.Http401Handler;
+import com.blog.recovery.config.handler.Http403Handler;
+import com.blog.recovery.config.handler.LoginFailHandler;
 import com.blog.recovery.domain.Users;
 import com.blog.recovery.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @Configuration
 @EnableWebSecurity(debug = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final ObjectMapper mapper;
+    private final UserRepository userRepository;
 
     /** @EnableWebSecurity를 사용하고있을때
      WebSecurityCustomizer 사용시 WebSecurity라는 객체를 스프링이 자동으로 주입해준다.
@@ -62,7 +69,13 @@ public class SecurityConfig {
                             .passwordParameter("password")
                             .loginPage("/auth/login")
                             .loginProcessingUrl("/auth/login")
-                            .defaultSuccessUrl("/");
+                            .defaultSuccessUrl("/")
+                            .failureHandler(new LoginFailHandler(mapper));
+                })
+                .addFilterBefore(emailPasswordAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(e -> {
+                            e.accessDeniedHandler(new Http403Handler(mapper));
+                            e.authenticationEntryPoint(new Http401Handler(mapper));
                 })
                 .rememberMe(rm ->
                         rm.rememberMeParameter("remember")
@@ -71,6 +84,34 @@ public class SecurityConfig {
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
+    }
+
+    @Bean
+    public EmailPasswordAuthFilter emailPasswordAuthFilter(){
+        EmailPasswordAuthFilter filter = new EmailPasswordAuthFilter("/auth/login", mapper);
+
+        filter.setAuthenticationManager(authenticationManager());
+        filter.setAuthenticationSuccessHandler(new SimpleUrlAuthenticationSuccessHandler("/"));
+        filter.setAuthenticationFailureHandler(new LoginFailHandler(mapper));
+        filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository()); //세션 발급
+
+        SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
+        rememberMeServices.setAlwaysRemember(true);
+        rememberMeServices.setValiditySeconds(3600 * 24 * 30);
+
+        filter.setRememberMeServices(rememberMeServices);
+
+        return filter;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+
+        provider.setUserDetailsService(userDetailsService(userRepository));
+        provider.setPasswordEncoder(passwordEncoder());
+
+        return new ProviderManager(provider);
     }
 
     @Bean
