@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -33,6 +34,7 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 
 @Configuration
 @EnableWebSecurity(debug = true)
+@EnableMethodSecurity()
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -59,10 +61,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(new AntPathRequestMatcher("/auth/login")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/auth/signUp")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/user")).hasAnyRole("USER","ADMIN")
-                                .requestMatchers(new AntPathRequestMatcher("/admin"))
-                                    .access(new WebExpressionAuthorizationManager("hasRole('ADMIN') AND hasAuthority('WRITE')"))
-                                                                                    //역할 : Role , 권한 : Authority
+                                                                                    //역할 : Role , 권한 : Authity
                                 .anyRequest().authenticated())
                 .formLogin(request -> {
                     request.usernameParameter("userName")
