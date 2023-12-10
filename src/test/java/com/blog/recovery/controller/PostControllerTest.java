@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -48,6 +49,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("/post 요청시 content값이 없을경우 검증 후 에러 메시지를 응답해야한다.")
     void post1() throws Exception {
         //given
@@ -69,6 +71,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("/post 요청시 DB에 요청한 정보가 저장되어야한다.")
     void post2() throws Exception {
         //given
@@ -92,6 +95,7 @@ class PostControllerTest {
 
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("사용자의 글 단건조회 요청에 성공해야한다.")
     void get() throws Exception {
         //given
@@ -121,6 +125,7 @@ class PostControllerTest {
 
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("사용자 요청에 의해 1페이지 조회 응답에 성공해야한다.")
     void test() throws Exception {
         //given
@@ -146,6 +151,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("사용자가 페이지 요청을 0으로해도 첫페이지를 가져온다.")
     void paging() throws Exception {
         //given
@@ -172,6 +178,7 @@ class PostControllerTest {
 
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("사용자의 글 수정 요청에 응답해야한다.")
     void update() throws Exception {
         //given
@@ -199,6 +206,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("사용자의 글 삭제 요청에 HTTP 200 code로 응답해야한다.")
     void delete() throws Exception {
         //given
@@ -223,6 +231,7 @@ class PostControllerTest {
 
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("존재하지않는 게시글 조회")
     void exceptionTest() throws Exception {
         //given
@@ -237,6 +246,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("존재하지않는 게시글 수정")
     void exceptionTest2() throws Exception {
         //given
@@ -256,6 +266,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("존재하지않는 게시글 삭제")
     void exceptionTest3() throws Exception {
         //given
@@ -269,6 +280,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("게시물 작성 요청시 내용에 '바보'는 포함 될 수 없다.")
     void post3() throws Exception {
         //given
@@ -288,6 +300,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kwon93@naver.com", roles = {"ADMIN"}, password = "k1234")
     @DisplayName("글작성 요청시 DB에 요청한 정보가 저장되어야한다.")
     void post4() throws Exception {
         //given

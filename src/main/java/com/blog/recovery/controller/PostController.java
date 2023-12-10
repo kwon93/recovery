@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,7 @@ public class PostController {
         return userSession.getId();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/post")
     public void post(@RequestBody @Validated PostCreate requset){
         requset.validate();
@@ -50,11 +52,12 @@ public class PostController {
         return service.getList(search);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PatchMapping("/post/{postId}")
     public PostResponse update(@PathVariable Long postId, @RequestBody @Validated PostEdit postEdit){
         return service.update(postId, postEdit);
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/post/{postId}")
     public void delete(@PathVariable Long postId){
         service.delete(postId);

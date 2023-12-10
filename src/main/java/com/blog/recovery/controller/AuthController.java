@@ -22,7 +22,6 @@ public class AuthController {
         return "로그인 페이지입니다.";
     }
 
-
     @PostMapping("/auth/signUp")
     public String  signUp(@RequestBody SignUp signUp){
         userService.signUp(signUp);

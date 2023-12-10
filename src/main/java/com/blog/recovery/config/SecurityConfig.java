@@ -4,6 +4,7 @@ import com.blog.recovery.config.filter.EmailPasswordAuthFilter;
 import com.blog.recovery.config.handler.Http401Handler;
 import com.blog.recovery.config.handler.Http403Handler;
 import com.blog.recovery.config.handler.LoginFailHandler;
+import com.blog.recovery.config.handler.LoginSuccessHandler;
 import com.blog.recovery.domain.Users;
 import com.blog.recovery.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,7 +91,7 @@ public class SecurityConfig {
         EmailPasswordAuthFilter filter = new EmailPasswordAuthFilter("/auth/login", mapper);
 
         filter.setAuthenticationManager(authenticationManager());
-        filter.setAuthenticationSuccessHandler(new SimpleUrlAuthenticationSuccessHandler("/"));
+        filter.setAuthenticationSuccessHandler(new LoginSuccessHandler(mapper));
         filter.setAuthenticationFailureHandler(new LoginFailHandler(mapper));
         filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository()); //세션 발급
 
